@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block conteiner %}
+  <main class="container">
+    <h1 class="h3 my-4">Корзина</h1>
+    {% if flag_login == False %}
+    <div class="alert alert-warning text-dark" role="alert">
+      Чтобы сделать заказ - <a href="/login/">войдите</a> или <a href="/register/">зарегестрируйтесь</a>
+    </div>
+    {% endif %}
+    {% if flag_del %}
+    <div class="alert alert-warning" role="alert">Блюдо удалено из корзины</div>
+    {% endif %}
+    <div class="row mt-5">
+      <div class="col-4">
+        <h4 class="">Ваши данные</h4>
+        <form method="POST" action="{{ url_for('cart') }}">
+          {{ form.csrf_token }}
+        <div class=" md-4 order-md-1">
+          <div class="mt-3 mb-3">
+            {{ form.name.label }}
+            {% for err in form.name.errors %}
+              <p class="text-danger">{{ err }}</p>
+            {% endfor %}
+            {{ form.name(class_="font-weight-bold form-control", required=true, value=client_data[0]) }}
+          </div>
+        </div>
+        <div class=" md-4 order-md-1">
+          <div class="mt-3 mb-3">
+            {{ form.address.label }}
+            {% for err in form.address.errors %}
+              <p class="text-danger">{{ err }}</p>
+            {% endfor %}
+            {{ form.address(class_="font-weight-bold form-control", required=true, value=client_data[1]) }}
+          </div>
+        </div>
+        <div class="md-4 form-label-group">
+          {{ form.email.label }}
+          {% for err in form.email.errors %}
+              <p class="text-danger">{{ err }}</p>
+            {% endfor %}
+          {{ form.email(class_="form-control", required=true, value=client_data[2]) }}
+        </div>
+        <div class=" md-4 order-md-1">
+          <div class="mt-3 mb-3">
+            {{ form.phone.label }}
+            {% for err in form.phone.errors %}
+              <p class="text-danger">{{ err }}</p>
+            {% endfor %}
+            {{ form.phone(class_="font-weight-bold form-control", required=true, value=client_data[3]) }}
+          </div>
+        </div>
+          {% if message %}<p class="text-danger">{{ message }}</p>{% endif %}
+        {{ form.submit(class_=" mt-3 mb-5 btn btn-danger") }}
+      </div>
+      <div class="col-1"></div>
+      <div class="col-7">
+        <h4 class="mb-3 col-7 mb-5">{{ count_cart[0] }}{% if count_cart[0] == 0%} блюд
+                                                      {% elif count_cart[0] == 1 %} блюдо
+                                                      {% elif count_cart[0] < 5 %} блюда
+                                                      {% else %} блюд {% endif %} в корзине</h4>
+        <table class="table">
+          <tbody>
+          {% for dish in dish_list %}
+            <tr>
+              <th scope="row">{{ dish.title}}</th>
+              <td></td>
+              <td>1</td>
+              <td>{{ dish.price }}</td>
+              <td><a class="text-danger" href="/cart/del/{{ dish.id }}">Удалить</a></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        <hr>
+        <p class="display-4 my-2 ">{{ count_cart[1]}} руб</p>
+      </div>
+    </div>
+  </main>
+  </main>
+  {% endblock %}

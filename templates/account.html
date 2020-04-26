@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block conteiner %}
+  <main class="container">
+    <section class="row">
+      <div class="col-12 col-lg-8">
+        <h1 class="h3 my-5">Личный кабинет. Заказы</h1>
+        {% for order in order_list %}
+        <div class="card">
+          <ul class="list-group list-group-flush">
+              <li class="list-group-item">
+              <div class="row">
+                <div class="col-7 col-lg-9">
+                  {% for date_id, date_val in client_order_date.items() %}
+                  {% if order.id == date_id %}
+                  <span class="h5 font-weight-bold">{{ date_val }}</span>
+                  {% endif %}{% endfor %}
+                  <span class="h5">- {{ order.cash }} P</span>
+                </div>
+
+                <div{% if order.status == 'Выполняется' %}
+                        class="col-3 col-lg-2 ml-5 py-2 badge badge-primary text-wrap"
+                    {% else %}
+                        class="col-3 col-lg-2 ml-5 py-2 badge badge-success text-wrap"{% endif %}>
+                  {{ order.status }}</div>
+              </div>
+            </li>
+
+                <div class="card-body">
+              <div class="row">
+                {% for dish in order.dishes %}
+                <p class="col-4 text-muted">{{ dish.title }}</p>
+                <p class="col-2 text-muted"> 1</p>
+                <p class="col-6 text-muted">{{ dish.price }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            {% endfor %}
+      </div>
+    </section>
+  </main>
+{% endblock %}
