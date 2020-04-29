@@ -35,7 +35,7 @@ def home():
     for cat in category:
         dish_dict[cat.id] = db.session.query(Dish).filter(Dish.category_id == cat.id).order_by(func.random()).limit(3)
     return render_template('index.html', category=category, dishes=dish_dict, count_cart=count_dish_nav(),
-                           flag_login=session['login'])
+                           flag_login=session.get('login', False))
 
 
 @app.route('/all/<cat>/')
@@ -43,7 +43,7 @@ def all_cat(cat):
     dish_dict = {cat: db.session.query(Dish).filter(Dish.category_id == cat).all()}
     category = db.session.query(Category).get(cat)
     return render_template('all.html', category=category, dishes=dish_dict, count_cart=count_dish_nav(),
-                           flag_login=session['login'])
+                           flag_login=session.get('login', False))
 
 @app.route('/addtocart/<id_dish>/')
 def addtocart(id_dish):
@@ -69,11 +69,15 @@ def cart():
     if form.validate_on_submit():
         if len(session['dish']) == 0:
             return render_template('cart.html', count_cart=count_dish_nav(), form=form, dish_list=dish_list,
-                                          flag_del=flag_del, flag_login=session['login'], client_data=client_data,
-                                          message='Не выбрано ни одного товара')
+                                   flag_del=flag_del, flag_login=session.get('login', False), client_data=client_data,
+                                   message='Не выбрано ни одного товара')
         client = db.session.query(Client).filter(Client.email == form.email.data).first()
         if client is not None:
             client_id = client.id
+            client.name = form.name.data
+            client.address = form.address.data
+            client.phone = form.phone.data
+            db.session.commit()
         else:
             client_new = Client(name=form.name.data, email=form.email.data, address=form.address.data,
                                 phone=form.phone.data)
@@ -92,14 +96,12 @@ def cart():
         session['client_email'] = order.email
         session['client_address'] = order.address
         session['client_phone'] = order.phone
-        if session['login']:
+        if session.get('login', False):
             return redirect('/account/')
         else:
             return redirect('/ordered/')
-    """client_data = [session.get('client_name', ''), session.get('client_address', ''),
-                   session.get('client_email', ''), session.get('client_phone', '')]"""
     return render_template('cart.html', count_cart=count_dish_nav(), form=form, dish_list=dish_list,
-                           flag_del=flag_del, flag_login=session['login'], client_data=client_data)
+                           flag_del=flag_del, flag_login=session.get('login', False), client_data=client_data)
 
 
 @app.route('/cart/del/<dish_id>')
@@ -113,7 +115,7 @@ def cart_del_dish(dish_id):
 
 @app.route('/account/')
 def account():
-    if session['login']:
+    if session.get('login', False):
         locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
         client_id = session['client_id']
         order_list = db.session.query(Order).filter(Order.client_id == client_id).all()
@@ -122,7 +124,7 @@ def account():
             order_string = str(order.date.strftime('%d') + ' ' + order.date.strftime('%B'))
             client_order_date[order.id] = order_string.title()
         return render_template('account.html', count_cart=count_dish_nav(), order_list=order_list,
-                               client_order_date=client_order_date, flag_login=session['login'])
+                               client_order_date=client_order_date, flag_login=session.get('login', False))
     else:
         return redirect('/')
 
@@ -178,9 +180,9 @@ def register():
             db.session.add(client)
             db.session.commit()
             session['client_id'] = client.id
-            session['client_name'] = client.name
+            session['client_name'] = ''
             session['client_email'] = client.email
-            session['client_phone'] = client.phone
+            session['client_phone'] = ''
             session['login'] = True
             return redirect('/account/')
         else:
@@ -200,4 +202,5 @@ def register():
 
 @app.route('/ordered/')
 def ordered():
-    return render_template('ordered.html', login=session['login'])
+    return render_template('ordered.html', login=session.get('login', False))
+

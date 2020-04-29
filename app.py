@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from admin import AdminClient, AdminDish, AdminCategory, AdminOrder
 from config import Config
+from models import Client, Dish, Order, Category
 
 app = Flask(__name__)
 app.config.from_object(Config)
